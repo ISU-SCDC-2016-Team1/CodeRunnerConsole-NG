@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/voxelbrain/goptions"
 )
@@ -16,7 +17,9 @@ func main() {
 		User string        `goptions:"-u, --username, obligatory, description='Username to authenticate with'"`
 		Key string         `goptions:"-i, --identity, obligatory, description='SSH Key to authenticate with'"`
 		Project string     `goptions:"-p, --project, obligatory, description='Project to deploy against'"`
-		Runner string     `goptions:"-r, --runner, obligatory, description='Runner to which to deploy'"`
+		Runner string      `goptions:"-r, --runner, obligatory, description='Runner to which to deploy'"`
+		Redirect string    `goptions:"-x, --redirect, description='Which redirect: normal, none, all'"`
+		Help goptions.Help `goptions:"-h, --help, description='Show this help'"`
 
 		goptions.Verbs
 		Deploy struct {
@@ -28,14 +31,16 @@ func main() {
 		Run struct {
 		} `goptions:"run"`
 		Stdin struct {
-			File string `goptions:"-f, --file, description='File of desired STDIN'"`
+			File string `goptions:"-f, --file, obligatory, description='File to set STDIN. If not specified, prints STDIN'"`
 		} `goptions:"stdin"`
-		Stdout struct {
-		} `goptions:"stdout"`
+		Get struct {
+			Method string `goptions:"-m, --method, obligatory, description='Method to fetch: stdin, stdout, or stderr'"`
+		} `goptions:"get"`
 	}{
+		Redirect: "normal"
 	}
 
-	fmt.Println("CodeRunnerConsole-NG v1")
+	log.Println("crconsole-ng v1")
 	goptions.ParseAndFail(&options)
 
 	if len(options.Verbs) <= 0 {
@@ -54,13 +59,13 @@ func main() {
 		doBuild(options.User, options.Key, options.Project, options.Runner)
 		break
 	case "run":
-		doRun(options.User, options.Key, options.Project, options.Runner)
+		doRun(options.User, options.Key, options.Project, options.Runner, options.Redirect)
 		break
 	case "stdin":
 		doStdin(options.User, options.Key, options.Project, options.Runner, options.Stdin.File)
 		break
-	case "stdout":
-		doStdout(options.User, options.Key, options.Project, options.Runner)
+	case "get":
+		doGet(options.User, options.Key, options.Project, options.Runner, options.Get.Method)
 		break
 	}
 }

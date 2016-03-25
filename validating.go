@@ -3,6 +3,7 @@ package main
 import (
 	"regexp"
 	"log"
+	"os"
 )
 
 func doValidateUsername(username string) bool {
@@ -22,8 +23,10 @@ func doValidateUsername(username string) bool {
 	return true
 }
 
-func doValidateKey(key string) bool {
-	// TODO - validate path exists
+func doValidateFile(file string) bool {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		return false
+	}
 	return true
 }
 
@@ -38,7 +41,7 @@ func doValidateProject(project string) bool {
 
 	n_project := r.ReplaceAllString(project, "")
 
-	if n_project != n_project {
+	if n_project != project {
 		return false
 	}
 
@@ -52,12 +55,20 @@ func doValidateRunner(runner string) bool {
 	return true
 }
 
+func doValidateMethod(method string) bool {
+	if (method != "normal" && method != "none" && method != "all" && method != "stdout" && method != "stdin" && method != "stderr") {
+		log.Println("Invalid method: ", method)
+		return false
+	}
+	return true
+}
+
 func doValidateAll(username, key, project, runner string) bool {
 	if (!doValidateUsername(username)) {
 		log.Println("Invalid username.")
 		return false
 	}
-	if (!doValidateKey(key)) {
+	if (!doValidateFile(key)) {
 		log.Println("Invalid key.")
 		return false
 	}
