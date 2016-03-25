@@ -18,7 +18,6 @@ func main() {
 		Key string         `goptions:"-i, --identity, obligatory, description='SSH Key to authenticate with'"`
 		Project string     `goptions:"-p, --project, obligatory, description='Project to deploy against'"`
 		Runner string      `goptions:"-r, --runner, obligatory, description='Runner to which to deploy'"`
-		Redirect string    `goptions:"-x, --redirect, description='Which redirect: normal, none, all'"`
 		Help goptions.Help `goptions:"-h, --help, description='Show this help'"`
 
 		goptions.Verbs
@@ -29,6 +28,7 @@ func main() {
 		Build struct {
 		} `goptions:"build"`
 		Run struct {
+			Redirect string `goptions:"-x, --redirect, description='Which redirect: normal, none, all'"`
 		} `goptions:"run"`
 		Stdin struct {
 			File string `goptions:"-f, --file, obligatory, description='File to set STDIN. If not specified, prints STDIN'"`
@@ -59,7 +59,7 @@ func main() {
 		doBuild(options.User, options.Key, options.Project, options.Runner)
 		break
 	case "run":
-		doRun(options.User, options.Key, options.Project, options.Runner, options.Redirect)
+		doRun(options.User, options.Key, options.Project, options.Runner, options.Run.Redirect)
 		break
 	case "stdin":
 		doStdin(options.User, options.Key, options.Project, options.Runner, options.Stdin.File)
