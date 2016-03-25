@@ -37,7 +37,7 @@ func main() {
 			Method string `goptions:"-m, --method, obligatory, description='Method to fetch: stdin, stdout, or stderr'"`
 		} `goptions:"get"`
 	}{
-		Redirect: "normal"
+		Redirect: "normal",
 	}
 
 	log.Println("crconsole-ng v1")

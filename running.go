@@ -5,14 +5,15 @@ import (
 	"os/exec"
 	"crypto/md5"
 	"io"
+	"fmt"
 	"bytes"
 )
 
-doReturnRunnerIP(runner string) string {
+func doReturnRunnerIP(runner string) string {
 	if (runner == "runner1") {
 		return "10.2.2.2"
 	} else if (runner == "runner2") {
-		return 10.2.2.3
+		return "10.2.2.3"
 	}
 
 	return ""
@@ -53,7 +54,7 @@ func doDeploy(username, key, project, runner string) {
 	io.WriteString(h, project)
 	var md5sum string = string(h.Sum(nil))
 
-	cmd := exec.Command("ssh", "-i", key fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "mkdir", "-p", "~/deploy/" + md5sum, " && ",  "cd", "~/deploy/" + md5sum, " && ", "git clone", "https://git.team1.isucdc.com/" + project)
+	cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "mkdir", "-p", "~/deploy/" + md5sum, " && ",  "cd", "~/deploy/" + md5sum, " && ", "git clone", "https://git.team1.isucdc.com/" + project)
 	cmd.Run()
 
 	doRemoveForwardedIdentity(username, key, project, runner)
@@ -70,7 +71,7 @@ func doClean(username, key, project, runner string) {
 	io.WriteString(h, project)
 	var md5sum string = string(h.Sum(nil))
 
-	cmd := exec.Command("ssh", "-i", key fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "rm", "-rf", "~/deploy/" + md5sum)
+	cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "rm", "-rf", "~/deploy/" + md5sum)
 	cmd.Run()
 
 	doRemoveForwardedIdentity(username, key, project, runner)
@@ -87,8 +88,8 @@ func doBuild(username, key, project, runner string) {
 	var md5sum string = string(h.Sum(nil))
 
 	var out bytes.Buffer
-	cmd := exec.Command("ssh", "-i", key fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd", "~/deploy/" + md5sum + "/*", " && ", "bash ./.build")
-	cmd.Stdout = out
+	cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd", "~/deploy/" + md5sum + "/*", " && ", "bash ./.build")
+	cmd.Stdout = &out
 	cmd.Run()
 	fmt.Println(out.String())
 }
@@ -109,16 +110,16 @@ func doRun(username, key, project, runner, method string) {
 
 	var out bytes.Buffer
 	if (method == "normal") {
-		cmd := exec.Command("ssh", "-i", key fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && bash ./.run > .stdout 2>/dev/null")
-		cmd.Stdout = out
+		cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && bash ./.run > .stdout 2>/dev/null")
+		cmd.Stdout = &out
 		cmd.Run()
 	} else if (method == "all") {
-		cmd := exec.Command("ssh", "-i", key fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && bash ./.run >.stdout 2>.stderr <.stdin")
-		cmd.Stdout = out
+		cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && bash ./.run >.stdout 2>.stderr <.stdin")
+		cmd.Stdout = &out
 		cmd.Run()
 	} else {
-		cmd := exec.Command("ssh", "-i", key fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && bash ./.run >/dev/null 2>/dev/null")
-		cmd.Stdout = out
+		cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && bash ./.run >/dev/null 2>/dev/null")
+		cmd.Stdout = &out
 		cmd.Run()
 	}
 
@@ -144,7 +145,7 @@ func doStdin(username, key, project, runner, stdin string) {
 	cmd := exec.Command("scp", "-i", key, stdin, fmt.Sprintf("%v@%v:~/.stdin", username, doReturnRunnerIP(runner)))
 	cmd.Run()
 
-	cmd = exec.Command("ssh", "-i", key fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && mv ~/.stdin ./.stdin")
+	cmd = exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && mv ~/.stdin ./.stdin")
 	cmd.Run()
 }
 
@@ -164,8 +165,8 @@ func doGet(username, key, project, runner, method string) {
 	var md5sum string = string(h.Sum(nil))
 
 	var out bytes.Buffer
-	cmd := exec.Command("ssh", "-i", key fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && cat ./." + method)
-	cmd.Stdout = out
+	cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && cat ./." + method)
+	cmd.Stdout = &out
 	cmd.Run()
 
 	fmt.Println(out.String())
