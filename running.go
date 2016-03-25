@@ -7,6 +7,7 @@ import (
 	"io"
 	"fmt"
 	"bytes"
+	"encoding/hex"
 )
 
 func doReturnRunnerIP(runner string) string {
@@ -52,7 +53,7 @@ func doDeploy(username, key, project, runner string) {
 
 	h := md5.New()
 	io.WriteString(h, project)
-	var md5sum string = string(h.Sum(nil))
+	var md5sum string = hex.EncodeToString(h.Sum(nil))
 
 	cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "mkdir", "-p", "~/deploy/" + md5sum, " && ",  "cd", "~/deploy/" + md5sum, " && ", "git clone", "https://git.team1.isucdc.com/" + project)
 	cmd.Run()
@@ -69,7 +70,7 @@ func doClean(username, key, project, runner string) {
 
 	h := md5.New()
 	io.WriteString(h, project)
-	var md5sum string = string(h.Sum(nil))
+	var md5sum string = hex.EncodeToString(h.Sum(nil))
 
 	cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "rm", "-rf", "~/deploy/" + md5sum)
 	cmd.Run()
@@ -85,7 +86,7 @@ func doBuild(username, key, project, runner string) {
 
 	h := md5.New()
 	io.WriteString(h, project)
-	var md5sum string = string(h.Sum(nil))
+	var md5sum string = hex.EncodeToString(h.Sum(nil))
 
 	var out bytes.Buffer
 	cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd", "~/deploy/" + md5sum + "/*", " && ", "bash ./.build")
@@ -106,7 +107,7 @@ func doRun(username, key, project, runner, method string) {
 
 	h := md5.New()
 	io.WriteString(h, project)
-	var md5sum string = string(h.Sum(nil))
+	var md5sum string = hex.EncodeToString(h.Sum(nil))
 
 	var out bytes.Buffer
 	if (method == "normal") {
@@ -140,7 +141,7 @@ func doStdin(username, key, project, runner, stdin string) {
 
 	h := md5.New()
 	io.WriteString(h, project)
-	var md5sum string = string(h.Sum(nil))
+	var md5sum string = hex.EncodeToString(h.Sum(nil))
 
 	cmd := exec.Command("scp", "-i", key, stdin, fmt.Sprintf("%v@%v:~/.stdin", username, doReturnRunnerIP(runner)))
 	cmd.Run()
@@ -162,7 +163,7 @@ func doGet(username, key, project, runner, method string) {
 
 	h := md5.New()
 	io.WriteString(h, project)
-	var md5sum string = string(h.Sum(nil))
+	var md5sum string = hex.EncodeToString(h.Sum(nil))
 
 	var out bytes.Buffer
 	cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "cd ~/deploy/" + md5sum + "/* && cat ./." + method)
