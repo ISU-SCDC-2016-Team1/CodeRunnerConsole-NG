@@ -28,7 +28,7 @@ func main() {
 		Build struct {
 		} `goptions:"build"`
 		Run struct {
-			Redirect string `goptions:"-x, --redirect, description='Which redirect: normal, none, all'"`
+			Redirect string `goptions:"-x, --redirect, obligatory, description='Which redirect: normal, none, all'"`
 		} `goptions:"run"`
 		Stdin struct {
 			File string `goptions:"-f, --file, obligatory, description='File to set STDIN. If not specified, prints STDIN'"`
@@ -37,7 +37,6 @@ func main() {
 			Method string `goptions:"-m, --method, obligatory, description='Method to fetch: stdin, stdout, or stderr'"`
 		} `goptions:"get"`
 	}{
-		Redirect: "normal",
 	}
 
 	log.Println("crconsole-ng v1")
