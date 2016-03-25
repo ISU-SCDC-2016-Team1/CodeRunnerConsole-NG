@@ -55,10 +55,14 @@ func doDeploy(username, key, project, runner string) {
 	io.WriteString(h, project)
 	var md5sum string = hex.EncodeToString(h.Sum(nil))
 
-	cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "mkdir", "-p", "~/deploy/" + md5sum, " && ",  "cd", "~/deploy/" + md5sum, " && ", "git clone", "https://git.team1.isucdc.com/" + project)
+	var out bytes.Buffer
+	cmd := exec.Command("ssh", "-i", key, fmt.Sprintf("%v@%v", username, doReturnRunnerIP(runner)), "mkdir -p ~/deploy/" + md5sum + " && ls ~/deploy/" + md5sum + " && cd ~/deploy/" + md5sum + " && git clone git@git.team1.isucdc.com:" + project + ".git 2>&1")
+	cmd.Stdout = &out
 	cmd.Run()
 
-	doRemoveForwardedIdentity(username, key, project, runner)
+	fmt.Println(out.String())
+
+	//doRemoveForwardedIdentity(username, key, project, runner)
 }
 
 func doClean(username, key, project, runner string) {
